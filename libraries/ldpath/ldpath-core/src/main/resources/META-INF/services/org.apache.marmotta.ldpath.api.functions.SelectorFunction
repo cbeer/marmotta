@@ -4,3 +4,5 @@ org.apache.marmotta.ldpath.model.functions.LastFunction
 org.apache.marmotta.ldpath.model.functions.SortFunction
 org.apache.marmotta.ldpath.model.functions.CountFunction
 org.apache.marmotta.ldpath.model.functions.HeaderFunction
+org.apache.marmotta.ldpath.model.functions.AsUriFunction
+org.apache.marmotta.ldpath.model.functions.UrlEncodeFunction
