@@ -19,6 +19,7 @@ package org.apache.marmotta.ldpath.backend.linkeddata;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.Multimap;
 import org.apache.marmotta.ldcache.api.LDCachingBackend;
 import org.apache.marmotta.ldcache.backend.infinispan.LDCachingInfinispanBackend;
@@ -355,7 +356,31 @@ public class LDCacheBackend implements RDFBackend<Value> {
      */
     @Override
     public Collection<Value> listSubjects(Value property, Value object) {
-        throw new UnsupportedOperationException("reverse traversal not supported for Linked Data backend");
+        log.info("retrieving subjects with property {} within object {}", property, object);
+        if(object instanceof org.openrdf.model.URI && property instanceof org.openrdf.model.URI) {
+            org.openrdf.model.URI o = (org.openrdf.model.URI) object;
+            org.openrdf.model.URI p = (org.openrdf.model.URI) property;
+
+            final Model statements = ldcache.get(o);
+
+            final Model filter;
+
+            if (o.getNamespace().equals(LDCache.SKOLEMIZED_NAMESPACE) ) {
+                final Resource resource = statements.filter(o, OWL.SAMEAS, null).objectResource();
+                filter = statements.filter(null, p, resource);
+            } else {
+                filter = statements.filter(null, p, object);
+            }
+
+            return Collections2.transform(filter.subjects(), new Function<Resource, Value>() {
+                @Override
+                public Value apply(Resource resource) {
+                    return (Value)resource;
+                }
+            });
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     @Override
